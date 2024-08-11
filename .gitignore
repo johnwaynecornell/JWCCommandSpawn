@@ -1,0 +1,16 @@
+bin
+*.bak
+*.tmp
+tmp
+/JWCEssentials
+.idea
+bin
+obj
+cmake-build-*
+*.bak
+bin
+bin/
+.idea
+obj
+obj/
+packages
