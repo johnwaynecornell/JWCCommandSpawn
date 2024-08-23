@@ -26,7 +26,7 @@ endif()
 
 add_definitions(-DBUILD_SPAWNEDPROCESS)
 
-include( "${CMAKE_SOURCE_DIR}/include/JWCEssentials/JWCEssentials.cmake")
+include( "$ENV{NewAge}/include/JWCEssentials/JWCEssentials.cmake")
 
 target_link_libraries(JWCCommandSpawn PUBLIC JWCEssentials)
 
@@ -37,3 +37,5 @@ target_link_libraries(JWCCommandSpawn_test PUBLIC JWCEssentials JWCCommandSpawn)
 
 add_executable(test_bash_invoke src/test_bash_invoke.cpp)
 target_link_libraries(test_bash_invoke PUBLIC JWCEssentials JWCCommandSpawn)
+
+shuttle(JWCCommandSpawn lib)
