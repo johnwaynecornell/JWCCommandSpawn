@@ -1,7 +1,8 @@
-#include "../CommandSpawn.h"
+#include "JWCCommandSpawn/CommandSpawn.h"
 #include <Windows.h>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 using namespace JWCEssentials;
 namespace JWCCommandSpawn
@@ -41,50 +42,40 @@ private:
     PROCESS_INFORMATION pi;
 
 public:
-    CommandSpawn_Windows() : CommandSpawn()
-    {
+    CommandSpawn_Windows() : CommandSpawn() {
     }
 
     ~CommandSpawn_Windows() override {
-        if (g_hChildStd_IN_Rd) CloseHandle(g_hChildStd_IN_Rd);
-        if (g_hChildStd_IN_Wr) CloseHandle(g_hChildStd_IN_Wr);
-
-        if (g_hChildStd_OUT_Rd) CloseHandle(g_hChildStd_OUT_Rd);
-        if (g_hChildStd_OUT_Wr) CloseHandle(g_hChildStd_OUT_Wr);
-
-        if (g_hChildStd_ERR_Rd) CloseHandle(g_hChildStd_ERR_Rd);
-        if (g_hChildStd_ERR_Wr) CloseHandle(g_hChildStd_ERR_Wr);
-
         Join();
-
-        // Close handles to the child process and its primary thread
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-
     }
 
     long Join() override
     {
-        WaitForSingleObject(pi.hProcess);
+        WaitForSingleObject(pi.hProcess, INFINITE);
 
-        long exitCode;
+        DWORD exitCode;
         // Get the exit code.
         GetExitCodeProcess(pi.hProcess, &exitCode);
 
+        Close();
         return exitCode;
     }
 
-    void SetDefaultShell() override {
-        SetShell("cmd", "/c");
+    Shell GetShell_Defaultl() override {
+        return { "cmd", "/c" };
     }
 
-    void SetBashShell() override {
-        SetShell("bash", "-c");
-
-        //SetShell("C:\\Program Files\\Git\\bin\\bash.exe", "-c");
+    Shell GetShell_Bash() override {
+        return { "bash", "-c" };
     }
 
-    bool Command(utf8_string_struct command, E_PIPE pipes) override{
+    void DiscardHandle(HANDLE &H)
+    {
+        CloseHandle(H);
+        H = nullptr;
+    }
+
+    CommandHandle Command(utf8_string_struct command, E_PIPE pipes) override{
         STARTUPINFO si;
         SECURITY_ATTRIBUTES sa;
 
@@ -164,11 +155,98 @@ public:
         }
 
         // Close handles to the stdin and stdout pipes no longer needed by the parent process
-        if (pipes & E_PIPE_STDIN) CloseHandle(g_hChildStd_IN_Rd);
-        if (pipes & E_PIPE_STDOUT) CloseHandle(g_hChildStd_OUT_Wr);
-        if (pipes & E_PIPE_STDERR) CloseHandle(g_hChildStd_ERR_Wr);
+        if (pipes & E_PIPE_STDIN) DiscardHandle(g_hChildStd_IN_Rd);
+        if (pipes & E_PIPE_STDOUT) DiscardHandle(g_hChildStd_OUT_Wr);
+        if (pipes & E_PIPE_STDERR) DiscardHandle(g_hChildStd_ERR_Wr);
 
-        return rc;
+        return rc ? this : nullptr;
+    }
+
+    bool HasShell(Shell shell) override {
+        return resolve(shell.shell);
+    }
+
+    static bool FileExists(const std::string& filename)
+    {
+        WIN32_FIND_DATAA fd = {0};
+        HANDLE hFound = FindFirstFileA(filename.c_str(), &fd);
+        bool retval = hFound != INVALID_HANDLE_VALUE;
+        FindClose(hFound);
+
+        return retval;
+    }
+
+    static utf8_string_struct resolveExecutablePath(const std::string &executable) {
+
+        // Get the PATH environment variable
+        char *pathEnv;
+        size_t env_size;
+
+        _dupenv_s(&pathEnv, &env_size, "PATH");
+
+        //const char *pathEnv = std::getenv("PATH");
+        if (!pathEnv) {
+            return "";
+        }
+
+        std::string pathStr(pathEnv);
+        std::istringstream pathStream(pathStr);
+        std::string pathDir;
+        std::vector<std::string> paths;
+
+        // Split the PATH environment variable into individual directories
+        while (std::getline(pathStream, pathDir, ';')) {
+            paths.push_back(pathDir);
+        }
+
+        // Search for the executable in each directory
+        for (const auto &dir : paths) {
+            std::string fullPath = dir + "\\" + executable;
+            if (FileExists(fullPath)) {
+                free(pathEnv);
+                return fullPath.c_str();
+            }
+        }
+
+        free(pathEnv);
+        // Executable not found
+        return nullptr;
+    }
+
+    static utf8_string_struct resolve(utf8_string_struct path) {
+        bool qualified = false;
+        bool escape = false;
+
+        for (int i=0; i < path.length; i++) {
+            if (!escape) {
+                if (path[i] == '\\') qualified = true;
+                //if (path[i] == '/') qualified = true;
+            } else escape = false;
+        }
+
+        if (!qualified) {
+            utf8_string_struct qpath = resolveExecutablePath(path.c_str);
+            return qpath;
+        } else if (FileExists(path.c_str)) {
+            return path;
+        }
+
+        return nullptr;
+    }
+
+    void Close() override {
+        if (g_hChildStd_IN_Rd) DiscardHandle(g_hChildStd_IN_Rd);
+        if (g_hChildStd_IN_Wr) DiscardHandle(g_hChildStd_IN_Wr);
+
+        if (g_hChildStd_OUT_Rd) DiscardHandle(g_hChildStd_OUT_Rd);
+        if (g_hChildStd_OUT_Wr) DiscardHandle(g_hChildStd_OUT_Wr);
+
+        if (g_hChildStd_ERR_Rd) DiscardHandle(g_hChildStd_ERR_Rd);
+        if (g_hChildStd_ERR_Wr) DiscardHandle(g_hChildStd_ERR_Wr);
+
+        // Close handles to the child process and its primary thread
+        DiscardHandle(pi.hProcess);
+        DiscardHandle(pi.hThread);
     }
 
     bool HasData(E_PIPE targ) override {
@@ -211,5 +289,5 @@ public:
 };
 
 CommandSpawn *CommandSpawn_Create() {
-    return new WindowsCommandSpawn();
+    return new CommandSpawn_Windows();
 }}

@@ -29,6 +29,27 @@ namespace JWCCommandSpawn {
 
         bool END[4] = {};
 
+        struct CommandHandle
+        {
+            CommandSpawn *myCommandSpawn;
+            _CLASSEXPORT_ CommandHandle();
+            _CLASSEXPORT_ CommandHandle(CommandSpawn *myCommandSpawn);
+
+            _CLASSEXPORT_ CommandHandle & operator=(CommandHandle &&other)
+            {
+                myCommandSpawn = other.myCommandSpawn;
+                other.myCommandSpawn = nullptr;
+                return *this;
+            }
+
+
+            _CLASSEXPORT_ CommandHandle & operator=(CommandSpawn *myCommandSpawn);
+            _CLASSEXPORT_ ~CommandHandle();
+
+            _CLASSEXPORT_ operator bool();
+            _CLASSEXPORT_ void release();
+        };
+
         struct Shell {
             utf8_string_struct shell = nullptr;
             utf8_string_struct shell_switch = nullptr;
@@ -49,31 +70,31 @@ namespace JWCCommandSpawn {
 
         CommandSpawn();
 
-        _CLASSEXPORT_ virtual ~CommandSpawn();
+        virtual ~CommandSpawn();
 
-        _CLASSEXPORT_ virtual Shell GetShell_Defaultl() = 0;
-        _CLASSEXPORT_ virtual Shell GetShell_Bash() = 0;
-        _CLASSEXPORT_ virtual Shell GetShell_Python();
+        virtual Shell GetShell_Defaultl() = 0;
+        virtual Shell GetShell_Bash() = 0;
+        virtual Shell GetShell_Python();
 
-        _CLASSEXPORT_ virtual bool HasShell(Shell shell) = 0;
+        virtual bool HasShell(Shell shell) = 0;
 
-        _CLASSEXPORT_ virtual void SetShell(Shell shell);
-        _CLASSEXPORT_ virtual void SetShellExplicit(utf8_string_struct shell, utf8_string_struct shell_switch);
-        _CLASSEXPORT_ virtual bool Command(utf8_string_struct command, E_PIPE pipes) = 0;
+        virtual void SetShell(Shell shell);
+        virtual void SetShellExplicit(utf8_string_struct shell, utf8_string_struct shell_switch);
+        virtual CommandHandle Command(utf8_string_struct command, E_PIPE pipes) = 0;
 
-        _CLASSEXPORT_ virtual void Close() = 0;
-        _CLASSEXPORT_ virtual long Join() = 0;
+        virtual void Close() = 0;
+        virtual long Join() = 0;
 
-        _CLASSEXPORT_ virtual utf8_string_struct ToString(utf8_string_struct command);
+        virtual utf8_string_struct ToString(utf8_string_struct command);
 
-        _CLASSEXPORT_ virtual bool HasData(E_PIPE targ) = 0;
-        _CLASSEXPORT_ virtual int ReadByte(E_PIPE targ) = 0;
-        _CLASSEXPORT_ virtual utf8_string_struct ReadLine(E_PIPE targ);
-        _CLASSEXPORT_ virtual utf8_string_struct ReadToEnd(E_PIPE targ);
+        virtual bool HasData(E_PIPE targ) = 0;
+        virtual int ReadByte(E_PIPE targ) = 0;
+        virtual utf8_string_struct ReadLine(E_PIPE targ);
+        virtual utf8_string_struct ReadToEnd(E_PIPE targ);
 
-        _CLASSEXPORT_ virtual void WriteByte(char byte) = 0;
-        _CLASSEXPORT_ virtual void WriteString(utf8_string_struct string);
-        _CLASSEXPORT_ virtual void WriteLine(utf8_string_struct line);
+        virtual void WriteByte(char byte) = 0;
+        virtual void WriteString(utf8_string_struct string);
+        virtual void WriteLine(utf8_string_struct line);
     };
 
     utf8_string_struct_array CStyle_ParseByWhitespace(const utf8_string_struct& command);

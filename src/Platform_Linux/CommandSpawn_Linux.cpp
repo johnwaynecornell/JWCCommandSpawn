@@ -131,10 +131,10 @@ namespace JWCCommandSpawn {
             return resolve(shell.shell);
         }
 
-        bool Command(utf8_string_struct command,  E_PIPE pipes) override {
+        CommandHandle Command(utf8_string_struct command,  E_PIPE pipes) override {
             if (state.pid != 0) {
                 std::cerr << "Join must be called before reusing CommandSpawn" << std::endl;
-                return false;
+                return nullptr;
             }
 
 
@@ -154,7 +154,7 @@ namespace JWCCommandSpawn {
 
             if (!path) {
                 std::cerr << "Can not find executable " << args[0];
-                return false;
+                return nullptr;
             }
 
             state.pid = fork();
@@ -207,7 +207,7 @@ namespace JWCCommandSpawn {
                     close(state.err_pipe[1]);
                 }
 
-                return rc;
+                return rc ? this : nullptr;
             }
         }
 

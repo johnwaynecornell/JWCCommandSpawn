@@ -4,11 +4,38 @@
 
 using namespace JWCEssentials;
 
-namespace JWCEssentials {
-    void utf8_string_struct_move(utf8_string_struct &This, utf8_string_struct &other);
-}
-
 namespace JWCCommandSpawn {
+
+    CommandSpawn::CommandHandle::CommandHandle()
+    {
+        myCommandSpawn = nullptr;
+    }
+
+    CommandSpawn::CommandHandle::CommandHandle(JWCCommandSpawn::CommandSpawn *myCommandSpawn)
+    {
+        this->myCommandSpawn = myCommandSpawn;
+    }
+
+    CommandSpawn::CommandHandle & CommandSpawn::CommandHandle::operator=(CommandSpawn *myCommandSpawn)
+    {
+        this->myCommandSpawn = myCommandSpawn;
+        return *this;
+    }
+
+    void CommandSpawn::CommandHandle::release()
+    {
+        this->myCommandSpawn->Join();
+    }
+
+    CommandSpawn::CommandHandle::operator bool()
+    {
+        return myCommandSpawn;
+    }
+
+    CommandSpawn::CommandHandle::~CommandHandle()
+    {
+        if (myCommandSpawn) myCommandSpawn->Join();
+    }
 
     CommandSpawn::Shell::Shell(Shell &other) {
         shell = other.shell;
