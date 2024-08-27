@@ -29,7 +29,9 @@ int main() {
     proc->Command(nullptr, (CommandSpawn::E_PIPE)(CommandSpawn::E_PIPE_STDIN | CommandSpawn::E_PIPE_STDOUT | CommandSpawn::E_PIPE_STDERR));
 
     std::cout << feffect( "fg_yellow(\"sudo -S ls -l\")") << std::endl;
-    proc->WriteLine("sudo -S ls -l");
+    //proc->WriteLine("sudo -S ls -l");
+    proc->WriteLine("ls -l");
+    proc->WriteLine("exit");
 
     bool C;
     do {

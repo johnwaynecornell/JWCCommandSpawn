@@ -258,16 +258,15 @@ namespace JWCCommandSpawn {
             return ch;
         }
 
-        void Flush() override {
-            fsync(state.in_pipe[1]);
-        }
-
         void WriteByte(char byte) override {
             if (write(state.in_pipe[1], &byte, 1) == -1)
                 throw std::runtime_error("WriteByte failed");
             if (byte == '\n') Flush();
         }
 
+        void Flush() override {
+            fsync(state.in_pipe[1]);
+        }
     };
 
     CommandSpawn *CommandSpawn_Create() {

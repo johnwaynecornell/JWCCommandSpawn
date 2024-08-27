@@ -131,7 +131,7 @@ namespace JWCCommandSpawn {
         while ((ch = ReadByte(targ)) != EOF && ch != '\n') {
             if (ch != '\r') line += (char) ch;
         }
-        if (ch == EOF && line.empty()) return utf8_string_struct();
+        if (ch == EOF && line.empty()) return {};
 
         return line.c_str();
     }
@@ -145,7 +145,7 @@ namespace JWCCommandSpawn {
             if ((ch = ReadByte(targ)) != EOF) {
                 if (ch != '\r') line += (char) ch;
             }
-            if (ch == EOF && line.empty()) return utf8_string_struct();
+            if (ch == EOF && line.empty()) return {};
         }
         return line.c_str();
     }

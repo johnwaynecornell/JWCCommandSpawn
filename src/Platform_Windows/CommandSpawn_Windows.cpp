@@ -1,5 +1,6 @@
 #include "JWCCommandSpawn/CommandSpawn.h"
 #include <Windows.h>
+#include <fileapi.h>
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -25,8 +26,6 @@ utf8_string_struct LastErrorString()
 
     return R;
 }
-
-
 
 class CommandSpawn_Windows : public CommandSpawn {
 private:
@@ -275,7 +274,7 @@ public:
         else if (targ == E_PIPE_STDERR) pipe = g_hChildStd_ERR_Rd;
         else throw std::runtime_error("Invalid output stream selector");
 
-        if (!ReadFile(pipe, &ch, 1, &dwRead, NULL) || dwRead == 0)
+        if (!ReadFile(pipe, &ch, 1, &dwRead, NULL) || dwRead <= 0)
             return EOF;
         return ch;
     }
@@ -284,6 +283,11 @@ public:
         DWORD dwWritten;
         if (!WriteFile(g_hChildStd_IN_Wr, &byte, 1, &dwWritten, NULL))
             throw std::runtime_error("WriteByte failed");
+        if (byte=='\n') Flush();
+    }
+
+    void Flush() override {
+        FlushFileBuffers(g_hChildStd_IN_Wr);
     }
 
 };
