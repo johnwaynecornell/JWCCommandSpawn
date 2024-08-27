@@ -37,7 +37,7 @@ int main() {
         if (proc->HasData(CommandSpawn::E_PIPE_STDERR)) {
             utf8_string_struct err_string = proc->ReadAll(CommandSpawn::E_PIPE_STDERR);
 
-            proc->WriteLine("_Llenroc4562");
+            proc->WriteLine(""); //password
 
         } else if (proc->HasData(CommandSpawn::E_PIPE_STDOUT)) C = false;
 
