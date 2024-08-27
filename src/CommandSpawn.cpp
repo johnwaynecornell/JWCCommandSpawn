@@ -16,6 +16,16 @@ namespace JWCCommandSpawn {
         this->myCommandSpawn = myCommandSpawn;
     }
 
+    CommandSpawn::CommandHandle & CommandSpawn::CommandHandle::operator=(CommandSpawn::CommandHandle &&other)
+    {
+        release();
+
+        myCommandSpawn = other.myCommandSpawn;
+        other.myCommandSpawn = nullptr;
+        return *this;
+    }
+
+
     CommandSpawn::CommandHandle & CommandSpawn::CommandHandle::operator=(CommandSpawn *myCommandSpawn)
     {
         this->myCommandSpawn = myCommandSpawn;
@@ -24,7 +34,10 @@ namespace JWCCommandSpawn {
 
     void CommandSpawn::CommandHandle::release()
     {
-        this->myCommandSpawn->Join();
+        if (myCommandSpawn) {
+            myCommandSpawn->Close();
+            myCommandSpawn = nullptr;
+        }
     }
 
     CommandSpawn::CommandHandle::operator bool()
@@ -34,7 +47,10 @@ namespace JWCCommandSpawn {
 
     CommandSpawn::CommandHandle::~CommandHandle()
     {
-        if (myCommandSpawn) myCommandSpawn->Join();
+        if (myCommandSpawn) {
+            myCommandSpawn->Close();
+            myCommandSpawn = nullptr;
+        }
     }
 
     CommandSpawn::Shell::Shell(Shell &other) {
@@ -117,6 +133,20 @@ namespace JWCCommandSpawn {
         }
         if (ch == EOF && line.empty()) return utf8_string_struct();
 
+        return line.c_str();
+    }
+
+    utf8_string_struct CommandSpawn::ReadAll(E_PIPE targ) {
+        if (END[targ]) return nullptr;
+
+        std::string line;
+        int ch;
+        while (HasData(targ)) {
+            if ((ch = ReadByte(targ)) != EOF) {
+                if (ch != '\r') line += (char) ch;
+            }
+            if (ch == EOF && line.empty()) return utf8_string_struct();
+        }
         return line.c_str();
     }
 

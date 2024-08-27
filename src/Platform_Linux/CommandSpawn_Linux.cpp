@@ -59,6 +59,7 @@ namespace JWCCommandSpawn {
 
         CommandSpawn_Linux() : CommandSpawn()
         {
+            memset(&state, 0, sizeof(state));
         }
 
         ~CommandSpawn_Linux() override {
@@ -95,11 +96,14 @@ namespace JWCCommandSpawn {
         }
 
         void Close() override {
+
             close(state.in_pipe[1]);
             close(state.out_pipe[0]);
             close(state.err_pipe[0]);
 
-            memset(&state, 1, sizeof(state));
+            memset(&state, 0, sizeof(state));
+
+            for (int i=0; i<5; i++) END[i] = false;
 
         }
 
@@ -131,12 +135,11 @@ namespace JWCCommandSpawn {
             return resolve(shell.shell);
         }
 
-        CommandHandle Command(utf8_string_struct command,  E_PIPE pipes) override {
+        long Command(utf8_string_struct command,  E_PIPE pipes) override {
             if (state.pid != 0) {
                 std::cerr << "Join must be called before reusing CommandSpawn" << std::endl;
-                return nullptr;
+                return -1;
             }
-
 
             command.verify_contained();
 
@@ -154,7 +157,7 @@ namespace JWCCommandSpawn {
 
             if (!path) {
                 std::cerr << "Can not find executable " << args[0];
-                return nullptr;
+                return -1;
             }
 
             state.pid = fork();
@@ -162,9 +165,6 @@ namespace JWCCommandSpawn {
                 throw std::runtime_error("Fork failed");
 
             if (state.pid == 0) {  // Child process
-                if (execv(path, args) == -1) {
-                    std::cerr << "ERROR FINDc " << command_line << std::endl;
-                }
 
                 if (pipes & E_PIPE_STDIN)
                 {
@@ -187,6 +187,10 @@ namespace JWCCommandSpawn {
                     close(state.err_pipe[1]);
                 }
 
+                if (execv(path, args) == -1) {
+                    std::cerr << "ERROR FINDc " << command_line << std::endl;
+                }
+
                 //execl("/bin/sh", "sh", "-c", escapeStringForCommandLine(command), (char *) 0);
                 _exit(EXIT_FAILURE);
             } else {  // Parent process
@@ -207,7 +211,7 @@ namespace JWCCommandSpawn {
                     close(state.err_pipe[1]);
                 }
 
-                return rc ? this : nullptr;
+                return rc ? 0 : -1;
             }
         }
 
@@ -254,9 +258,14 @@ namespace JWCCommandSpawn {
             return ch;
         }
 
+        void Flush() override {
+            fsync(state.in_pipe[1]);
+        }
+
         void WriteByte(char byte) override {
             if (write(state.in_pipe[1], &byte, 1) == -1)
                 throw std::runtime_error("WriteByte failed");
+            if (byte == '\n') Flush();
         }
 
     };

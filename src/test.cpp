@@ -13,23 +13,45 @@ int main() {
     CommandSpawn::CommandHandle h;
 
     CommandSpawn *proc = CommandSpawn_Create();
-    proc->SetShell(proc->GetShell_Defaultl());
-
-    h = proc->Command("dir /s", CommandSpawn::E_PIPE_NONE);
-    h = proc->Command("dir /s", CommandSpawn::E_PIPE_STDOUT);
+    //proc->SetShell(proc->GetShell_Defaultl());
 
     utf8_string_struct line;
+
+    proc->SetShell(proc->GetShell_Bash());
+/*
+    proc->Command("ls -a", CommandSpawn::E_PIPE_STDOUT);
     while ((line = proc->ReadLine(CommandSpawn::E_PIPE_STDOUT)) != nullptr) {
         std::cout << "got " << line << std::endl;
 
     }
+    proc->Join();
+*/
+    proc->Command(nullptr, (CommandSpawn::E_PIPE)(CommandSpawn::E_PIPE_STDIN | CommandSpawn::E_PIPE_STDOUT | CommandSpawn::E_PIPE_STDERR));
 
-    h.release();
+    std::cout << feffect( "fg_yellow(\"sudo -S ls -l\")") << std::endl;
+    proc->WriteLine("sudo -S ls -l");
 
-    proc->SetShell(proc->GetShell_Bash());
+    bool C;
+    do {
+        C = true;
+        if (proc->HasData(CommandSpawn::E_PIPE_STDERR)) {
+            utf8_string_struct err_string = proc->ReadAll(CommandSpawn::E_PIPE_STDERR);
 
-    h = proc->Command("ls -a", CommandSpawn::E_PIPE_NONE);
-    h = proc->Command("ls - a", CommandSpawn::E_PIPE_STDOUT);
+            proc->WriteLine("_Llenroc4562");
+
+        } else if (proc->HasData(CommandSpawn::E_PIPE_STDOUT)) C = false;
+
+    } while (C);
+
+    //line = proc->ReadLine(CommandSpawn::E_PIPE_STDOUT);
+
+    //std::cout << "got " << feffect( "fg_green(\""+line + "\")", nullptr) << std::endl;
+
+    while ((line = proc->ReadLine(CommandSpawn::E_PIPE_STDOUT)) != nullptr) {
+        std::cout << feffect( "fg_green(\""+line+"\")") << std::endl;
+    }
+    proc->Join();
+
 
 
     return 0;

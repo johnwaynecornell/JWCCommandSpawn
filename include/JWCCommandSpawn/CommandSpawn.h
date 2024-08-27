@@ -27,7 +27,7 @@ namespace JWCCommandSpawn {
             E_PIPE_STDIN=4
         };
 
-        bool END[4] = {};
+        bool END[5] = {};
 
         struct CommandHandle
         {
@@ -35,14 +35,7 @@ namespace JWCCommandSpawn {
             _CLASSEXPORT_ CommandHandle();
             _CLASSEXPORT_ CommandHandle(CommandSpawn *myCommandSpawn);
 
-            _CLASSEXPORT_ CommandHandle & operator=(CommandHandle &&other)
-            {
-                myCommandSpawn = other.myCommandSpawn;
-                other.myCommandSpawn = nullptr;
-                return *this;
-            }
-
-
+            _CLASSEXPORT_ CommandHandle & operator=(CommandHandle &&other);
             _CLASSEXPORT_ CommandHandle & operator=(CommandSpawn *myCommandSpawn);
             _CLASSEXPORT_ ~CommandHandle();
 
@@ -68,6 +61,10 @@ namespace JWCCommandSpawn {
 
         Shell shell = {nullptr, nullptr};
 
+        void ClearShell() {
+            shell = {nullptr, nullptr};
+        }
+
         CommandSpawn();
 
         virtual ~CommandSpawn();
@@ -80,7 +77,7 @@ namespace JWCCommandSpawn {
 
         virtual void SetShell(Shell shell);
         virtual void SetShellExplicit(utf8_string_struct shell, utf8_string_struct shell_switch);
-        virtual CommandHandle Command(utf8_string_struct command, E_PIPE pipes) = 0;
+        virtual long Command(utf8_string_struct command, E_PIPE pipes) = 0;
 
         virtual void Close() = 0;
         virtual long Join() = 0;
@@ -91,10 +88,12 @@ namespace JWCCommandSpawn {
         virtual int ReadByte(E_PIPE targ) = 0;
         virtual utf8_string_struct ReadLine(E_PIPE targ);
         virtual utf8_string_struct ReadToEnd(E_PIPE targ);
+        virtual utf8_string_struct ReadAll(E_PIPE targ);
 
         virtual void WriteByte(char byte) = 0;
         virtual void WriteString(utf8_string_struct string);
         virtual void WriteLine(utf8_string_struct line);
+        virtual void Flush() = 0;
     };
 
     utf8_string_struct_array CStyle_ParseByWhitespace(const utf8_string_struct& command);
