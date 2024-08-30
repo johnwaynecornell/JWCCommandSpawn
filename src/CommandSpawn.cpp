@@ -263,8 +263,6 @@ namespace JWCCommandSpawn {
         return This->ToString(command);
     }
 
-
-
     bool CommandSpawn_HasData(CommandSpawn *This, CommandSpawn::E_PIPE targ) {
         return This->HasData(targ);
     }
