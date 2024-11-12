@@ -49,9 +49,9 @@ namespace JWCCommandSpawn {
     class CommandSpawn_Linux : public CommandSpawn {
     private:
         struct {
-            int in_pipe[2]={};
-            int out_pipe[2]={};
-            int err_pipe[2]={};
+            int in_pipe[2]={-1,-1};
+            int out_pipe[2]={-1,-1};
+            int err_pipe[2]={-1,-1};
             pid_t pid={};
         } state;
 
@@ -59,7 +59,7 @@ namespace JWCCommandSpawn {
 
         CommandSpawn_Linux() : CommandSpawn()
         {
-            memset(&state, 0, sizeof(state));
+            //memset(&state, 0, sizeof(state));
         }
 
         ~CommandSpawn_Linux() override {
@@ -95,13 +95,29 @@ namespace JWCCommandSpawn {
             return nullptr;
         }
 
+        void close_descriptor(int &descriptor) {
+            close(descriptor);
+            descriptor = -1;
+        }
+
+        void ClosePipe(E_PIPE pipes) override {
+            if (pipes & E_PIPE_STDIN)
+                close_descriptor(state.in_pipe[1]);
+            if (pipes & E_PIPE_STDOUT)
+                close_descriptor(state.out_pipe[0]);
+            if (pipes & E_PIPE_STDERR)
+                close_descriptor(state.err_pipe[0]);
+        }
+
         void Close() override {
 
-            close(state.in_pipe[1]);
-            close(state.out_pipe[0]);
-            close(state.err_pipe[0]);
+            ClosePipe((E_PIPE )(E_PIPE_STDIN | E_PIPE_STDOUT | E_PIPE_STDERR));
 
             memset(&state, 0, sizeof(state));
+
+            for (int i=0; i<2; i++) {
+                state.err_pipe[i] = state.out_pipe[i] = state.in_pipe[i] = -1;
+            }
 
             for (int i=0; i<5; i++) END[i] = false;
 
@@ -118,8 +134,7 @@ namespace JWCCommandSpawn {
                 if ( WIFEXITED(status) )
                 {
                     exit_status = WEXITSTATUS(status);
-                    printf("Exit status of the child was %d\n",
-                                                 exit_status);
+                    //printf("Exit status of the child was %d\n", exit_status);
                 }
 
                 last_return = exit_status;
@@ -135,7 +150,7 @@ namespace JWCCommandSpawn {
             return resolve(shell.shell);
         }
 
-        long Command(utf8_string_struct command,  E_PIPE pipes) override {
+        long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override {
             if (state.pid != 0) {
                 std::cerr << "Join must be called before reusing CommandSpawn" << std::endl;
                 return -1;
@@ -145,9 +160,24 @@ namespace JWCCommandSpawn {
 
             bool rc = true;
 
-            if (pipes & E_PIPE_STDIN && pipe(state.in_pipe) == -1) throw std::runtime_error("Pipe creation failed");
-            if (pipes & E_PIPE_STDOUT && pipe(state.out_pipe) == -1) throw std::runtime_error("Pipe creation failed");
-            if (pipes & E_PIPE_STDERR && pipe(state.err_pipe) == -1) throw std::runtime_error("Pipe creation failed");
+            bool provide_input = for_stdin != nullptr;
+            bool stdin = (pipes & E_PIPE_STDIN) == E_PIPE_STDIN;
+            bool stdout = (pipes & E_PIPE_STDOUT) == E_PIPE_STDOUT;
+            bool stderr = (pipes & E_PIPE_STDERR) == E_PIPE_STDERR;
+
+            if (stdin || provide_input)
+                if (pipe(state.in_pipe) == -1) throw std::runtime_error("Pipe creation failed");
+            if (stdout)
+                if (pipe(state.out_pipe) == -1) throw std::runtime_error("Pipe creation failed");
+            if (stderr)
+                if (pipe(state.err_pipe) == -1) throw std::runtime_error("Pipe creation failed");
+
+            // if (for_stdin != nullptr) {
+            //     WriteString(for_stdin);
+            //     Flush();
+            //     if ((pipes & E_PIPE_STDIN) != E_PIPE_STDIN) ClosePipe(E_PIPE_STDIN);
+            //     //close_descriptor(state.in_pipe[1]);
+            // }
 
             utf8_string_struct command_line = ToString(command);
             utf8_string_struct path;
@@ -160,31 +190,38 @@ namespace JWCCommandSpawn {
                 return -1;
             }
 
+            if (for_stdin != nullptr) {
+                WriteString(for_stdin);
+                Flush();
+                if (!stdin) ClosePipe(E_PIPE_STDIN);
+                //close_descriptor(state.in_pipe[1]);
+            }
+
             state.pid = fork();
             if (state.pid == -1)
                 throw std::runtime_error("Fork failed");
 
             if (state.pid == 0) {  // Child process
 
-                if (pipes & E_PIPE_STDIN)
+                if (stdin || provide_input)
                 {
-                    close(state.in_pipe[1]);
+                    close_descriptor(state.in_pipe[1]);
                     dup2(state.in_pipe[0], STDIN_FILENO);
-                    close(state.in_pipe[0]);
+                    close_descriptor(state.in_pipe[0]);
                 }
 
-                if (pipes & E_PIPE_STDOUT)
+                if (stdout)
                 {
-                    close(state.out_pipe[0]);
+                    close_descriptor(state.out_pipe[0]);
                     dup2(state.out_pipe[1], STDOUT_FILENO);
-                    close(state.out_pipe[1]);
+                    close_descriptor(state.out_pipe[1]);
                 }
 
-                if (pipes & E_PIPE_STDERR)
+                if (stderr)
                 {
-                    close(state.err_pipe[0]);
+                    close_descriptor(state.err_pipe[0]);
                     dup2(state.err_pipe[1], STDERR_FILENO);
-                    close(state.err_pipe[1]);
+                    close_descriptor(state.err_pipe[1]);
                 }
 
                 if (execv(path, args) == -1) {
@@ -196,20 +233,9 @@ namespace JWCCommandSpawn {
             } else {  // Parent process
                 execvArgs_free(args);
 
-                if (pipes & E_PIPE_STDIN)
-                {
-                    close(state.in_pipe[0]);
-                }
-
-                if (pipes & E_PIPE_STDOUT)
-                {
-                    close(state.out_pipe[1]);
-                }
-
-                if (pipes & E_PIPE_STDERR)
-                {
-                    close(state.err_pipe[1]);
-                }
+                close_descriptor(state.in_pipe[0]);
+                close_descriptor(state.out_pipe[1]);
+                close_descriptor(state.err_pipe[1]);
 
                 return rc ? 0 : -1;
             }

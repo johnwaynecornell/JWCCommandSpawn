@@ -29,20 +29,6 @@ namespace JWCCommandSpawn {
 
         bool END[5] = {};
 
-        struct CommandHandle
-        {
-            CommandSpawn *myCommandSpawn;
-            _CLASSEXPORT_ CommandHandle();
-            _CLASSEXPORT_ CommandHandle(CommandSpawn *myCommandSpawn);
-
-            _CLASSEXPORT_ CommandHandle & operator=(CommandHandle &&other);
-            _CLASSEXPORT_ CommandHandle & operator=(CommandSpawn *myCommandSpawn);
-            _CLASSEXPORT_ ~CommandHandle();
-
-            _CLASSEXPORT_ operator bool();
-            _CLASSEXPORT_ void release();
-        };
-
         struct Shell {
             utf8_string_struct shell = nullptr;
             utf8_string_struct shell_switch = nullptr;
@@ -77,9 +63,10 @@ namespace JWCCommandSpawn {
 
         virtual void SetShell(Shell shell);
         virtual void SetShellExplicit(utf8_string_struct shell, utf8_string_struct shell_switch);
-        virtual long Command(utf8_string_struct command, E_PIPE pipes) = 0;
+        virtual long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) = 0;
 
         virtual void Close() = 0;
+        virtual void ClosePipe( CommandSpawn::E_PIPE pipes) = 0;
         virtual long Join() = 0;
 
         virtual utf8_string_struct ToString(utf8_string_struct command);
@@ -93,36 +80,39 @@ namespace JWCCommandSpawn {
         virtual void WriteByte(char byte) = 0;
         virtual void WriteString(utf8_string_struct string);
         virtual void WriteLine(utf8_string_struct line);
+
+
         virtual void Flush() = 0;
     };
 
     utf8_string_struct_array CStyle_ParseByWhitespace(const utf8_string_struct& command);
 
-    _EXPORT_ CommandSpawn *CommandSpawn_Create();
-    _EXPORT_ void CommandSpawn_Destroy(CommandSpawn *This);
+    _EXPORT_ P_INSTANCE(CommandSpawn) CommandSpawn_Create();
+    _EXPORT_ void CommandSpawn_Destroy(P_INSTANCE(CommandSpawn) This);
 
-    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Defaultl(CommandSpawn *This);
-    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Bash(CommandSpawn *This);
-    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Python(CommandSpawn *This);
+    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Defaultl(P_INSTANCE(CommandSpawn) This);
+    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Bash(P_INSTANCE(CommandSpawn) This);
+    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Python(P_INSTANCE(CommandSpawn) This);
 
-    _EXPORT_ bool CommandSpawn_HasShell(CommandSpawn *This, CommandSpawn::Shell shell);
+    _EXPORT_ bool CommandSpawn_HasShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
 
-    _EXPORT_ void SetCommandSpawn_SetShell(CommandSpawn *This, CommandSpawn::Shell shell);
-    _EXPORT_ void SetCommandSpawn_SetShellExplicit(CommandSpawn *This, utf8_string_struct shell, utf8_string_struct shell_switch);
-    _EXPORT_ bool CommandSpawn_Command(CommandSpawn *This, utf8_string_struct command, CommandSpawn::E_PIPE pipes);
+    _EXPORT_ void SetCommandSpawn_SetShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
+    _EXPORT_ void SetCommandSpawn_SetShellExplicit(P_INSTANCE(CommandSpawn) This, utf8_string_struct shell, utf8_string_struct shell_switch);
+    _EXPORT_ bool CommandSpawn_Command(P_INSTANCE(CommandSpawn) This, utf8_string_struct command,  utf8_string_struct for_stdin, CommandSpawn::E_PIPE pipes);
 
-    _EXPORT_ long CommandSpawn_Join(CommandSpawn * This);
+    _EXPORT_ long CommandSpawn_Join(P_INSTANCE(CommandSpawn)  This);
+    _EXPORT_ void CommandSpawn_ClosePipe(P_INSTANCE(CommandSpawn)  This, CommandSpawn::E_PIPE pipes);
 
-    _EXPORT_ utf8_string_struct CommandSpawn_ToString(CommandSpawn * This, utf8_string_struct command);
+    _EXPORT_ utf8_string_struct CommandSpawn_ToString(P_INSTANCE(CommandSpawn)  This, utf8_string_struct command);
 
-    _EXPORT_ bool CommandSpawn_HasData(CommandSpawn * This, CommandSpawn::E_PIPE targ);
-    _EXPORT_ int CommandSpawn_ReadByte(CommandSpawn * This, CommandSpawn::E_PIPE targ);
-    _EXPORT_ utf8_string_struct CommandSpawn_ReadLine(CommandSpawn * This, CommandSpawn::E_PIPE targ);
-    _EXPORT_ utf8_string_struct CommandSpawn_ReadToEnd(CommandSpawn * This, CommandSpawn::E_PIPE targ);
+    _EXPORT_ bool CommandSpawn_HasData(P_INSTANCE(CommandSpawn)  This, CommandSpawn::E_PIPE targ);
+    _EXPORT_ int CommandSpawn_ReadByte(P_INSTANCE(CommandSpawn)  This, CommandSpawn::E_PIPE targ);
+    _EXPORT_ utf8_string_struct CommandSpawn_ReadLine(P_INSTANCE(CommandSpawn)  This, CommandSpawn::E_PIPE targ);
+    _EXPORT_ utf8_string_struct CommandSpawn_ReadToEnd(P_INSTANCE(CommandSpawn)  This, CommandSpawn::E_PIPE targ);
 
-    _EXPORT_ void CommandSpawn_WriteByte(CommandSpawn *This, char byte);
-    _EXPORT_ void CommandSpawn_WriteString(CommandSpawn * This, utf8_string_struct string);
-    _EXPORT_ void CommandSpawn_WriteLine(CommandSpawn * This, utf8_string_struct line);
+    _EXPORT_ void CommandSpawn_WriteByte(P_INSTANCE(CommandSpawn) This, char byte);
+    _EXPORT_ void CommandSpawn_WriteString(P_INSTANCE(CommandSpawn)  This, utf8_string_struct string);
+    _EXPORT_ void CommandSpawn_WriteLine(P_INSTANCE(CommandSpawn)  This, utf8_string_struct line);
 }
 
 #undef _EXPORT_

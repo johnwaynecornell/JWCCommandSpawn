@@ -56,7 +56,7 @@ int main() {
         try {
             handler->SetShell(handler->GetShell_Bash());
 
-            rc = handler->Command("echo Hello, World!", CommandSpawn::E_PIPE_STDOUT);
+            rc = handler->Command("echo Hello, World!", nullptr, CommandSpawn::E_PIPE_STDOUT);
         } catch (const std::exception &ex) {
             std::cerr << "Error: " << ex.what() << std::endl;
         }

@@ -74,7 +74,7 @@ public:
         H = nullptr;
     }
 
-    long Command(utf8_string_struct command, E_PIPE pipes) override{
+    long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override{
         STARTUPINFO si;
         SECURITY_ATTRIBUTES sa;
 
@@ -128,6 +128,8 @@ public:
         } else {
             si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
         }
+
+        if (for_stdin != nullptr) WriteString(for_stdin);
 
         // Set up members of the PROCESS_INFORMATION structure
         ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));

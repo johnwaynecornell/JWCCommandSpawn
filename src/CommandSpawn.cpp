@@ -6,6 +6,7 @@ using namespace JWCEssentials;
 
 namespace JWCCommandSpawn {
 
+    /*
     CommandSpawn::CommandHandle::CommandHandle()
     {
         myCommandSpawn = nullptr;
@@ -52,6 +53,7 @@ namespace JWCCommandSpawn {
             myCommandSpawn = nullptr;
         }
     }
+    */
 
     CommandSpawn::Shell::Shell(Shell &other) {
         shell = other.shell;
@@ -251,9 +253,14 @@ namespace JWCCommandSpawn {
         This->SetShellExplicit(shell, shell_switch);
     }
 
-    bool CommandSpawn_Command(CommandSpawn *This, utf8_string_struct command,  CommandSpawn::E_PIPE pipes) {
-        return This->Command(command, pipes);
+    bool CommandSpawn_Command(CommandSpawn *This, utf8_string_struct command,   utf8_string_struct for_stdin, CommandSpawn::E_PIPE pipes) {
+        return This->Command(command, for_stdin, pipes);
     }
+
+     void CommandSpawn_ClosePipe(P_INSTANCE(CommandSpawn)  This, CommandSpawn::E_PIPE pipes) {
+        This->ClosePipe(pipes);
+    }
+
 
     long CommandSpawn_Join(CommandSpawn * This) {
         return This->Join();
