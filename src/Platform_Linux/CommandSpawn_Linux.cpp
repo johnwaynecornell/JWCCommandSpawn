@@ -67,11 +67,11 @@ namespace JWCCommandSpawn {
         }
 
         Shell GetShell_Defaultl() override {
-            return { "/bin/sh", "-c" };
+            return { "sh", "/bin/sh", "-c" };
         }
 
         Shell GetShell_Bash() override {
-            return { "/bin/bash", "-c" };
+            return { "bash", "/bin/bash", "-c" };
         }
 
         static utf8_string_struct resolve(utf8_string_struct path) {

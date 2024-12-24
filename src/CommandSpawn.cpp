@@ -56,21 +56,25 @@ namespace JWCCommandSpawn {
     */
 
     CommandSpawn::Shell::Shell(Shell &other) {
+        name = other.name;
         shell = other.shell;
         shell_switch = other.shell_switch;
     }
 
     CommandSpawn::Shell::Shell(Shell &&other) noexcept{
+        utf8_string_struct_move(name, other.name);
         utf8_string_struct_move(shell, other.shell);
         utf8_string_struct_move(shell_switch, other.shell_switch);
     }
 
-    CommandSpawn::Shell::Shell(utf8_string_struct shell, utf8_string_struct shell_switch) {
+    CommandSpawn::Shell::Shell(utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch) {
+        this->name = name;
         this->shell = shell;
         this->shell_switch = shell_switch;
     }
 
     CommandSpawn::Shell & CommandSpawn::Shell::operator=(Shell &other) {
+        name = other.name;
         shell = other.shell;
         shell_switch = other.shell_switch;
         return *this;
@@ -78,6 +82,7 @@ namespace JWCCommandSpawn {
 
     CommandSpawn::Shell & CommandSpawn::Shell::operator=(Shell &&other) noexcept {
         if (&other != this) {
+            utf8_string_struct_move(name, other.name);
             utf8_string_struct_move(shell, other.shell);
             utf8_string_struct_move(shell_switch, other.shell_switch);
         }
@@ -88,19 +93,19 @@ namespace JWCCommandSpawn {
     CommandSpawn::~CommandSpawn() = default;
 
     CommandSpawn::Shell CommandSpawn::GetShell_Python() {
-        return { "python", "-c" };
+        return { "python", "python", "-c" };
     }
 
     void CommandSpawn::SetShell(Shell shell) {
         this->shell = shell;
     }
 
-    void CommandSpawn::SetShellExplicit(utf8_string_struct shell, utf8_string_struct shell_switch) {
+    void CommandSpawn::SetShellExplicit(utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch) {
         if (shell.c_str == nullptr || shell_switch.c_str == nullptr) {
             throw std::invalid_argument("Shell and switch must not be null");
         }
 
-        this->shell = { shell, shell_switch };
+        this->shell = { name, shell, shell_switch };
     }
 
     utf8_string_struct CommandSpawn::ToString(utf8_string_struct command) {
@@ -249,8 +254,8 @@ namespace JWCCommandSpawn {
         This->SetShell(shell);
     }
 
-    void SetCommandSpawn_SetShellExplicit(CommandSpawn *This, utf8_string_struct shell, utf8_string_struct shell_switch) {
-        This->SetShellExplicit(shell, shell_switch);
+    void SetCommandSpawn_SetShellExplicit(CommandSpawn *This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch) {
+        This->SetShellExplicit(name, shell, shell_switch);
     }
 
     bool CommandSpawn_Command(CommandSpawn *This, utf8_string_struct command,   utf8_string_struct for_stdin, CommandSpawn::E_PIPE pipes) {

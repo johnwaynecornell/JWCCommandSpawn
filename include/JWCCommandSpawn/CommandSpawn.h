@@ -30,13 +30,14 @@ namespace JWCCommandSpawn {
         bool END[5] = {};
 
         struct Shell {
+            utf8_string_struct name = nullptr;
             utf8_string_struct shell = nullptr;
             utf8_string_struct shell_switch = nullptr;
 
             _CLASSEXPORT_ Shell(Shell &other);
             _CLASSEXPORT_ Shell(Shell &&other) noexcept;
 
-            _CLASSEXPORT_ Shell(utf8_string_struct shell, utf8_string_struct shell_switch);
+            _CLASSEXPORT_ Shell(utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
 
             _CLASSEXPORT_ Shell & operator = (Shell &other);
             _CLASSEXPORT_ Shell & operator = (Shell &&other) noexcept;
@@ -45,10 +46,10 @@ namespace JWCCommandSpawn {
 
         long last_return = 0;
 
-        Shell shell = {nullptr, nullptr};
+        Shell shell = {nullptr, nullptr, nullptr};
 
         void ClearShell() {
-            shell = {nullptr, nullptr};
+            shell = {nullptr, nullptr, nullptr};
         }
 
         CommandSpawn();
@@ -62,7 +63,7 @@ namespace JWCCommandSpawn {
         virtual bool HasShell(Shell shell) = 0;
 
         virtual void SetShell(Shell shell);
-        virtual void SetShellExplicit(utf8_string_struct shell, utf8_string_struct shell_switch);
+        virtual void SetShellExplicit(utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
         virtual long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) = 0;
 
         virtual void Close() = 0;
@@ -97,7 +98,7 @@ namespace JWCCommandSpawn {
     _EXPORT_ bool CommandSpawn_HasShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
 
     _EXPORT_ void SetCommandSpawn_SetShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
-    _EXPORT_ void SetCommandSpawn_SetShellExplicit(P_INSTANCE(CommandSpawn) This, utf8_string_struct shell, utf8_string_struct shell_switch);
+    _EXPORT_ void SetCommandSpawn_SetShellExplicit(P_INSTANCE(CommandSpawn) This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
     _EXPORT_ bool CommandSpawn_Command(P_INSTANCE(CommandSpawn) This, utf8_string_struct command,  utf8_string_struct for_stdin, CommandSpawn::E_PIPE pipes);
 
     _EXPORT_ long CommandSpawn_Join(P_INSTANCE(CommandSpawn)  This);

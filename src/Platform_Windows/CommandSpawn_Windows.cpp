@@ -61,11 +61,11 @@ public:
     }
 
     Shell GetShell_Defaultl() override {
-        return { "cmd", "/c" };
+        return { "cmd", "cmd", "/c" };
     }
 
     Shell GetShell_Bash() override {
-        return { "bash", "-c" };
+        return { "bash", "bash", "-c" };
     }
 
     void DiscardHandle(HANDLE &H)
