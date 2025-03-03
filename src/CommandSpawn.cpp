@@ -250,11 +250,11 @@ namespace JWCCommandSpawn {
         return This->HasShell(shell);
     }
 
-    void SetCommandSpawn_SetShell(CommandSpawn *This, CommandSpawn::Shell shell) {
+    void CommandSpawn_SetShell(CommandSpawn *This, CommandSpawn::Shell shell) {
         This->SetShell(shell);
     }
 
-    void SetCommandSpawn_SetShellExplicit(CommandSpawn *This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch) {
+    void CommandSpawn_SetShellExplicit(CommandSpawn *This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch) {
         This->SetShellExplicit(name, shell, shell_switch);
     }
 

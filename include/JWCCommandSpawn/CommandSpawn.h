@@ -97,8 +97,8 @@ namespace JWCCommandSpawn {
 
     _EXPORT_ bool CommandSpawn_HasShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
 
-    _EXPORT_ void SetCommandSpawn_SetShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
-    _EXPORT_ void SetCommandSpawn_SetShellExplicit(P_INSTANCE(CommandSpawn) This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
+    _EXPORT_ void CommandSpawn_SetShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
+    _EXPORT_ void CommandSpawn_SetShellExplicit(P_INSTANCE(CommandSpawn) This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
     _EXPORT_ bool CommandSpawn_Command(P_INSTANCE(CommandSpawn) This, utf8_string_struct command,  utf8_string_struct for_stdin, CommandSpawn::E_PIPE pipes);
 
     _EXPORT_ long CommandSpawn_Join(P_INSTANCE(CommandSpawn)  This);
