@@ -27,6 +27,11 @@ else()
     )
 endif()
 
+#this only need to run once per cmake for linking preferably the main target
+#  later binary discovery is handled at the runtime level
+newage_configure_native_paths(JWCCommandSpawn)
+
+
 find_library(LIBJWCEssentials JWCEssentials)
 
 target_link_libraries(JWCCommandSpawn ${LIBJWCEssentials})
