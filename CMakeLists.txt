@@ -27,8 +27,8 @@ else()
     )
 endif()
 
-#this only need to run once per cmake for linking preferably the main target
-#  later binary discovery is handled at the runtime level
+#this only needs to run once per cmake, for linking preferably with the main
+#  target as it's parameter.  Later, binary discovery is handled at the runtime level
 newage_configure_native_paths(JWCCommandSpawn)
 
 
