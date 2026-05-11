@@ -84,8 +84,8 @@ void inject() {
 
     proc->SetShell(proc->GetShell_Bash());
 
-    Exec("xargs -I{} echo {}", "1\n2\n3\n");
-    Exec("xargs -I{} echo {}", "1\n2\n3\n");
+    printf("%s\n", Exec("xargs -I{} echo {}", "1\n2\n3\n").c_str);
+    printf("%s\n", Exec("xargs -I{} echo {}", "1\n2\n3\n").c_str);
 
     return;
 

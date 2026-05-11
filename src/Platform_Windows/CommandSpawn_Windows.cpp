@@ -74,7 +74,7 @@ public:
         H = nullptr;
     }
 
-    long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override{
+    bool Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override{
         STARTUPINFO si;
         SECURITY_ATTRIBUTES sa;
 
@@ -160,7 +160,7 @@ public:
         if (pipes & E_PIPE_STDOUT) DiscardHandle(g_hChildStd_OUT_Wr);
         if (pipes & E_PIPE_STDERR) DiscardHandle(g_hChildStd_ERR_Wr);
 
-        return rc ? 0 : -1;
+        return rc;
     }
 
     bool HasShell(Shell shell) override {

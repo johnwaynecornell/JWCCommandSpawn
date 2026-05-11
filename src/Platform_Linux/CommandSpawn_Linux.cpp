@@ -150,7 +150,7 @@ namespace JWCCommandSpawn {
             return resolve(shell.shell);
         }
 
-        long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override {
+        bool Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override {
             if (state.pid != 0) {
                 std::cerr << "Join must be called before reusing CommandSpawn" << std::endl;
                 return -1;
@@ -237,7 +237,7 @@ namespace JWCCommandSpawn {
                 close_descriptor(state.out_pipe[1]);
                 close_descriptor(state.err_pipe[1]);
 
-                return rc ? 0 : -1;
+                return rc;
             }
         }
 

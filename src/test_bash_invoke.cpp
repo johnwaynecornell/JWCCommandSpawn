@@ -69,6 +69,10 @@ int main() {
             }
 
             CommandSpawn_Destroy(handler);
+        } else
+        {
+            std::cerr << "Error: Command execution failed" << std::endl;
+            CommandSpawn_Destroy(handler);
         }
     }
 

@@ -64,7 +64,7 @@ namespace JWCCommandSpawn {
 
         virtual void SetShell(Shell shell);
         virtual void SetShellExplicit(utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
-        virtual long Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) = 0;
+        virtual bool Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) = 0;
 
         virtual void Close() = 0;
         virtual void ClosePipe( CommandSpawn::E_PIPE pipes) = 0;
