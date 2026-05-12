@@ -74,6 +74,12 @@ public:
         H = nullptr;
     }
 
+    void ClosePipe(E_PIPE pipes) override {
+        if (pipes & E_PIPE_STDIN) DiscardHandle(g_hChildStd_IN_Wr);
+        if (pipes & E_PIPE_STDOUT) DiscardHandle(g_hChildStd_OUT_Rd);
+        if (pipes & E_PIPE_STDERR) DiscardHandle(g_hChildStd_ERR_Rd);        
+    }
+
     bool Command(utf8_string_struct command, utf8_string_struct for_stdin, E_PIPE pipes) override{
         STARTUPINFO si;
         SECURITY_ATTRIBUTES sa;
@@ -115,7 +121,7 @@ public:
             si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
         }
 
-        if (pipes & E_PIPE_STDIN) {
+        if ((pipes & E_PIPE_STDIN) || (for_stdin != nullptr)) {
             // Create a pipe for the child process's STDIN
             if (!CreatePipe(&g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &sa, 0))
                 throw std::runtime_error("Stdin pipe creation failed");
@@ -128,9 +134,7 @@ public:
         } else {
             si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
         }
-
-        if (for_stdin != nullptr) WriteString(for_stdin);
-
+        
         // Set up members of the PROCESS_INFORMATION structure
         ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
 
@@ -159,6 +163,13 @@ public:
         if (pipes & E_PIPE_STDIN) DiscardHandle(g_hChildStd_IN_Rd);
         if (pipes & E_PIPE_STDOUT) DiscardHandle(g_hChildStd_OUT_Wr);
         if (pipes & E_PIPE_STDERR) DiscardHandle(g_hChildStd_ERR_Wr);
+
+        if (for_stdin != nullptr) 
+        {
+            WriteString(for_stdin);
+            Flush(); 
+            if (!(pipes & E_PIPE_STDIN)) ClosePipe(E_PIPE_STDIN);                               
+        }
 
         return rc;
     }

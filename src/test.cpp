@@ -67,7 +67,12 @@ utf8_string_struct Exec(utf8_string_struct command, utf8_string_struct input)
     // CommandSpawn_WriteString(proc, forstdin);
     // CommandSpawn_ClosePipe(proc, CommandSpawn::E_PIPE_STDIN);
 
-    CommandSpawn_Command(proc, cmd, forstdin, (CommandSpawn::E_PIPE) (CommandSpawn::E_PIPE_STDOUT));
+    if (!CommandSpawn_Command(proc, cmd, forstdin, (CommandSpawn::E_PIPE) (CommandSpawn::E_PIPE_STDOUT)))
+    {
+        std::cerr << command.c_str << "can not be run";
+        exit(1);
+        
+    }
 
     //CommandSpawn_ClosePipe(proc, CommandSpawn::E_PIPE_STDIN);
 
