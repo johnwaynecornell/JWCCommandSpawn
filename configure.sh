@@ -13,6 +13,14 @@ if [ -z "${NewAge:-}" ]; then
     exit 1
 fi
 
+if [ ! -f "$NewAge/JWCEssentials/Dev/NewAge.dev.sh" ]; then
+    echo "[JWCCommandSpawn configure] ERROR: JWCEssentials development helpers were not found." >&2
+    echo "[JWCCommandSpawn configure] Expected: $NewAge/JWCEssentials/Dev/NewAge.dev.sh" >&2
+    echo "[JWCCommandSpawn configure] Run JWCEssentials/configure.sh first." >&2
+    echo "[JWCCommandSpawn configure] See: https://github.com/johnwaynecornell/JWCEssentials" >&2
+    exit 1
+fi
+
 . "$NewAge/JWCEssentials/Dev/NewAge.dev.sh"
 
 newage_register_repo_root "$REPO_ROOT" "$REPO_REL_PATH"
