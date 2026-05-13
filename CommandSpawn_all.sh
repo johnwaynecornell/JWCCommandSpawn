@@ -47,10 +47,34 @@ build_native_and_managed() {
     dotnet build "$managed_project"
 }
 
-mkdir -p NewAge
-cd NewAge
+usage() {
+    cat <<EOF
+Usage:
+  ./CommandSpawn_all.sh WORKSPACE_DIR
+
+Example:
+  ./CommandSpawn_all.sh NewAge
+  ./CommandSpawn_all.sh /tmp/NewAge_CommandSpawn_test
+
+Notes:
+  WORKSPACE_DIR will be created if it does not exist.
+  The script will use WORKSPACE_DIR as the NewAge workspace root.
+  This script pulls if the repos preexist, copy and tailor suite
+EOF
+}
+
+if [ "$#" -ne 1 ]; then
+    usage >&2
+    exit 1
+fi
+
+WORKSPACE_DIR="$1"
+
+mkdir -p "$WORKSPACE_DIR"
+cd "$WORKSPACE_DIR"
 
 export NewAge="$(pwd)"
+
 export PATH="$NewAge/bin:$PATH"
 
 lane=""

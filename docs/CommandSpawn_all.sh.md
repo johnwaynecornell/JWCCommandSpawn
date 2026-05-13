@@ -48,6 +48,13 @@ See docs in [JWCEssentials on GitHub](https://github.com/johnwaynecornell/JWCEss
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This script is intended for clean-machine testing, temporary workspace proof
+#    runs, native collection, and packaging preparation.
+# It does not requirw a prior clone to run and will fetch the JWCEssentials
+#   and JWCCommandSpawn repos
+# See https://github.com/johnwaynecornell.net/JWCEssentials/docs for help meeting
+#   build prerequisites
+
 newage_is_windows_shell() {
     case "$(uname -s)" in
         CYGWIN*|MINGW*|MSYS*) return 0 ;;
@@ -87,10 +94,18 @@ build_native_and_managed() {
     dotnet build "$managed_project"
 }
 
-mkdir -p NewAge
-cd NewAge
+usage() {
+    cat <&2
+    exit 1
+fi
+
+WORKSPACE_DIR="$1"
+
+mkdir -p "$WORKSPACE_DIR"
+cd "$WORKSPACE_DIR"
 
 export NewAge="$(pwd)"
+
 export PATH="$NewAge/bin:$PATH"
 
 lane=""
@@ -134,5 +149,5 @@ echo "  $lane"
 echo
 echo "Repos:"
 echo "  $NewAge/JWCEssentials"
-echo "  $NewAge/JWCCommandSpawn"
+echo "  $NewAge/JWCCommandSpawn"/code>
 ```
