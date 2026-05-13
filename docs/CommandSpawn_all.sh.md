@@ -59,7 +59,7 @@ newage_is_windows_shell() {
     case "$(uname -s)" in
         CYGWIN*|MINGW*|MSYS*) return 0 ;;
         *) return 1 ;;
-    esacs
+    esac
 }
 
 usage() {
