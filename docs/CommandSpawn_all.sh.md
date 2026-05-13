@@ -17,7 +17,7 @@ The script is intended for clean-machine testing, temporary workspace proof runs
 ## Usage
 
 ```
-./CommandSpawn_all.sh
+Dev/CommandSpawn_all.sh
 ```
 
 ## Repositories
