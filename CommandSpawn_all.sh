@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#This script is intended for clean-machine testing, temporary workspace proof
+# This script is intended for clean-machine testing, temporary workspace proof
 #    runs, native collection, and packaging preparation.
-#It does not requirw a prior clone to run and will fetch the JWCEssentials
+# It does not requirw a prior clone to run and will fetch the JWCEssentials
 #   and JWCCommandSpawn repos
+# See https://github.com/johnwaynecornell.net/JWCEssentials/docs for help meeting
+#   build prerequisites
 
 newage_is_windows_shell() {
     case "$(uname -s)" in

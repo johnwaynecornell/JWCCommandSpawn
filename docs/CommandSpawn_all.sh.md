@@ -40,6 +40,8 @@ This script does not require the repositories to already exist. If they do exist
 
 The script intentionally uses `--newage` so it can build inside a fresh local workspace without requiring system-wide environment changes.
 
+See docs in [JWCEssentials on GitHub](https://github.com/johnwaynecornell/JWCEssentials) for help meeting build prerequisites. If they are fulfilled you may proceed here.
+
 ## CommandSpawn\_all.sh
 
 ```
