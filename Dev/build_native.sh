@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ ! -f "Dev/NewAge.dev.sh" ]; then
+if [ ! -f "../JWCEssentials/Dev/NewAge.dev.sh" ]; then
   echo "Expected run from NewAge/Repo" >&2
-  return 1
+  exit 1
 fi
 
 if [ ! -f "CMakeLists.txt" ]; then
