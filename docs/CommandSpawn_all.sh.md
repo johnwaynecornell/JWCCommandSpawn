@@ -42,6 +42,27 @@ The script intentionally uses `--newage` so it can build inside a fresh local wo
 
 See docs in [JWCEssentials on GitHub](https://github.com/johnwaynecornell/JWCEssentials) for help meeting build prerequisites. If they are fulfilled you may proceed here
 
+### Evolution
+As of 20260515_211620 the commands below do the job the branch switch is not permanent. Use this instead. Replace tmp with a workspace name as desired.
+```
+mkdir tmp
+cd tmp
+git clone https://github.com/johnwaynecornell/JWCEssentials
+cd JWCEssentials
+git switch scratch/integration-refactor
+cd ..
+JWCEssentials/configure.sh --newage "$(pwd)"
+
+./in_this_context.sh Debug -- git clone https://github.com/johnwaynecornell/JWCCommandSpawn
+./in_this_context.sh Debug -- in_dir.sh JWCCommandSpawn git switch scratch/integration-refactor
+./in_this_context.sh Debug -- in_dir.sh JWCCommandSpawn ./configure.sh
+
+./in_this_context.sh Debug -- newage_build_coordinated.sh JWCEssentials Debug
+./in_this_context.sh Debug -- newage_build_coordinated.sh JWCCommandSpawn Debug
+```
+
+
+
 ## CommandSpawn\_all.sh
 
 ```
