@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # This script may be stored and run or updated to suit it does not require NewAge to pre-exist
+# Note:You must meet NewAge build requirements find more in docs at [JWCEssentials on github](https://github.com/johnwaynecornell/JWCEssentials)
 
 # Fail gracefully if no directory argument is passed
 target_dir="${1:-}"
