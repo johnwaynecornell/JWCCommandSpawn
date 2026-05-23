@@ -14,3 +14,14 @@ bin/
 obj
 obj/
 packages
+
+.idea
+cmake-build-*
+/build/
+*.kate-swp
+*DotSettings.user
+CMakeCache.txt
+CMakeFiles/
+/Dev/enabled_futures.lst
+*.cmake
+Makefile
