@@ -114,11 +114,16 @@ namespace JWCCommandSpawn {
             // Launch the command directly
             if (!command) {
                 return shell.shell;
-
-                throw std::invalid_argument("Command must not be null when shell is not set");
             } else {
                 // Escape the command for command line
-                utf8_string_struct escaped_command = escapeStringForCommandLine(command.c_str);
+                utf8_string_struct escaped_command;
+
+                if (shell.name && shell.name.c_str && std::string(shell.name.c_str) == "bash") {
+                    escaped_command = escapeStringForCommandLine_Linux(command.c_str);
+                } else {
+                    escaped_command = escapeStringForCommandLine(command.c_str);
+                }
+
                 // Decorate the command with the shell and switch
                 return shell.shell + " " + shell.shell_switch + " " + escaped_command;
             }
