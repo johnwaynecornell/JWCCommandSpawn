@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <MyReferencePath>$(NewAge)\DotNet\Libs\lib\$(Configuration)\$(TargetFramework)</MyReferencePath>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\JWCCommandSpawn.net\JWCCommandSpawn.net.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="$(MyReferencePath)\JWCEssentials.net.dll" />
+    </ItemGroup>
+
+</Project>
