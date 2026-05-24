@@ -1,6 +1,8 @@
 #include "JWCCommandSpawn/CommandSpawn.h"
 
 #include <cstring>
+#include <string>
+#include <sstream>
 
 using namespace JWCEssentials;
 
@@ -96,6 +98,14 @@ namespace JWCCommandSpawn {
         return { "python", "python", "-c" };
     }
 
+    void CommandSpawn::SetEscapementStyle(EscapementStyle style) {
+        escapement_style = style;
+    }
+
+    CommandSpawn::EscapementStyle CommandSpawn::GetEscapementStyle() {
+        return escapement_style;
+    }
+
     void CommandSpawn::SetShell(Shell shell) {
         this->shell = shell;
     }
@@ -108,6 +118,46 @@ namespace JWCCommandSpawn {
         this->shell = { name, shell, shell_switch };
     }
 
+    static utf8_string_struct escapeStringForCommandLine_CmdExe(utf8_string_struct text) {
+        std::string input = std::string(text.c_str);
+        std::string escaped = "\"";
+        for (char c : input) {
+            if (c == '"') escaped += "^\"";
+            else escaped += c;
+        }
+        escaped += "\"";
+        return escaped.c_str();
+    }
+
+    static utf8_string_struct escapeStringForCommandLine_PowerShell(utf8_string_struct text) {
+        std::string input = std::string(text.c_str);
+        std::string escaped = "'";
+        for (char c : input) {
+            if (c == '\'') escaped += "''";
+            else escaped += c;
+        }
+        escaped += "'";
+        return escaped.c_str();
+    }
+
+    utf8_string_struct CommandSpawn_escapeStringForCommandLine(utf8_string_struct value, CommandSpawn::EscapementStyle style) {
+        switch (style) {
+            case CommandSpawn::EscapementStyle_None:
+                return value;
+            case CommandSpawn::EscapementStyle_PosixShell:
+                return escapeStringForCommandLine_Linux(value);
+            case CommandSpawn::EscapementStyle_WindowsCommandLine:
+                return escapeStringForCommandLine_Windows(value);
+            case CommandSpawn::EscapementStyle_CmdExe:
+                return escapeStringForCommandLine_CmdExe(value);
+            case CommandSpawn::EscapementStyle_PowerShell:
+                return escapeStringForCommandLine_PowerShell(value);
+            case CommandSpawn::EscapementStyle_Auto:
+            default:
+                return JWCEssentials::escapeStringForCommandLine(value);
+        }
+    }
+
     utf8_string_struct CommandSpawn::ToString(utf8_string_struct command) {
 
         if (shell.shell) {
@@ -118,10 +168,14 @@ namespace JWCCommandSpawn {
                 // Escape the command for command line
                 utf8_string_struct escaped_command;
 
-                if (shell.name && shell.name.c_str && std::string(shell.name.c_str) == "bash") {
-                    escaped_command = escapeStringForCommandLine_Linux(command.c_str);
+                if (escapement_style == EscapementStyle_Auto) {
+                    if (shell.name && shell.name.c_str && std::string(shell.name.c_str) == "bash") {
+                        escaped_command = escapeStringForCommandLine_Linux(command.c_str);
+                    } else {
+                        escaped_command = JWCEssentials::escapeStringForCommandLine(command.c_str);
+                    }
                 } else {
-                    escaped_command = escapeStringForCommandLine(command.c_str);
+                    escaped_command = CommandSpawn_escapeStringForCommandLine(command.c_str, escapement_style);
                 }
 
                 // Decorate the command with the shell and switch
@@ -239,8 +293,8 @@ namespace JWCCommandSpawn {
 
 
 
-    CommandSpawn::Shell CommandSpawn_GetShell_Defaultl(CommandSpawn *This) {
-        return This->GetShell_Defaultl();
+    CommandSpawn::Shell CommandSpawn_GetShell_Default(CommandSpawn *This) {
+        return This->GetShell_Default();
     }
 
     CommandSpawn::Shell CommandSpawn_GetShell_Bash(CommandSpawn *This) {
@@ -253,6 +307,14 @@ namespace JWCCommandSpawn {
 
     bool CommandSpawn_HasShell(CommandSpawn *This, CommandSpawn::Shell shell) {
         return This->HasShell(shell);
+    }
+
+    void CommandSpawn_SetEscapementStyle(CommandSpawn *This, CommandSpawn::EscapementStyle style) {
+        This->SetEscapementStyle(style);
+    }
+
+    CommandSpawn::EscapementStyle CommandSpawn_GetEscapementStyle(CommandSpawn *This) {
+        return This->GetEscapementStyle();
     }
 
     void CommandSpawn_SetShell(CommandSpawn *This, CommandSpawn::Shell shell) {

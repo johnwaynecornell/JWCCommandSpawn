@@ -44,4 +44,7 @@ target_link_libraries(JWCCommandSpawn_test PUBLIC ${LIBJWCEssentials} JWCCommand
 add_executable(test_bash_invoke src/test_bash_invoke.cpp)
 target_link_libraries(test_bash_invoke PUBLIC ${LIBJWCEssentials} JWCCommandSpawn)
 
+add_executable(test_escapement src/test_escapement.cpp)
+target_link_libraries(test_escapement PUBLIC ${LIBJWCEssentials} JWCCommandSpawn)
+
 shuttle(JWCCommandSpawn lib)

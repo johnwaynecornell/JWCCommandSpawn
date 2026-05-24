@@ -13,7 +13,7 @@ void shell_io() {
     //CommandSpawn::CommandHandle h;
 
     CommandSpawn *proc = CommandSpawn_Create();
-    //proc->SetShell(proc->GetShell_Defaultl());
+    //proc->SetShell(proc->GetShell_Default());
 
     utf8_string_struct line;
 

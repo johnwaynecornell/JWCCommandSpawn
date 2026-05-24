@@ -9,12 +9,22 @@ public class CommandSpawn
     
     [Flags]
     public enum E_PIPE
-        {
-            E_PIPE_NONE=0,
-            E_PIPE_STDOUT=1,
-            E_PIPE_STDERR=2,
-            E_PIPE_STDIN=4
-        };
+    {
+        E_PIPE_NONE=0,
+        E_PIPE_STDOUT=1,
+        E_PIPE_STDERR=2,
+        E_PIPE_STDIN=4
+    };
+
+    public enum E_EscapementStyle {
+        Auto = 0,
+        None = 1,
+        Raw = 1,
+        PosixShell = 2,
+        WindowsCommandLine = 3,
+        CmdExe = 4,
+        PowerShell = 5
+    };
 
     public struct Shell
     {
@@ -29,9 +39,12 @@ public class CommandSpawn
         public static extern IntPtr CommandSpawn_Create();
         [DllImport("JWCCommandSpawn")]
         public static extern void CommandSpawn_Destroy(IntPtr This);
+        
+        [DllImport("JWCCommandSpawn")]
+        public static extern utf8_string_struct CommandSpawn_escapeStringForCommandLine(ref utf8_string_struct value, E_EscapementStyle style);
 
         [DllImport("JWCCommandSpawn")]
-        public static extern CommandSpawn.Shell CommandSpawn_GetShell_Defaultl(IntPtr This);
+        public static extern CommandSpawn.Shell CommandSpawn_GetShell_Default(IntPtr This);
         [DllImport("JWCCommandSpawn")]
         public static extern CommandSpawn.Shell CommandSpawn_GetShell_Bash(IntPtr This);
         [DllImport("JWCCommandSpawn")]
@@ -39,6 +52,11 @@ public class CommandSpawn
 
         [DllImport("JWCCommandSpawn")]
         public static extern bool CommandSpawn_HasShell(IntPtr This, ref CommandSpawn.Shell shell);
+
+        [DllImport("JWCCommandSpawn")]
+        public static extern void CommandSpawn_SetEscapementStyle(IntPtr This, CommandSpawn.E_EscapementStyle style);
+        [DllImport("JWCCommandSpawn")]
+        public static extern CommandSpawn.E_EscapementStyle CommandSpawn_GetEscapementStyle(IntPtr This);
 
         [DllImport("JWCCommandSpawn")]
         public static extern void CommandSpawn_SetShell(IntPtr This, ref CommandSpawn.Shell shell);
@@ -87,9 +105,36 @@ public class CommandSpawn
         DllImports.CommandSpawn_Destroy(Handle);
     }
 
+    public static string escapeStringForCommandLine(string value, E_EscapementStyle style)
+    {
+        utf8_string_struct val = value;
+        return DllImports.CommandSpawn_escapeStringForCommandLine(ref val, style);
+    }
+
+    public Shell GetShell_Default()
+    {
+        return DllImports.CommandSpawn_GetShell_Default(Handle);
+    }
+
     public Shell GetShell_Bash()
     {
-        return CommandSpawn.DllImports.CommandSpawn_GetShell_Bash(Handle);
+        return DllImports.CommandSpawn_GetShell_Bash(Handle);
+    }
+
+    public Shell GetShell_Python()
+    {
+        return DllImports.CommandSpawn_GetShell_Python(Handle);
+    }
+
+    public bool HasShell(ref Shell shell)
+    {
+        return DllImports.CommandSpawn_HasShell(Handle, ref shell);
+    }
+
+    public E_EscapementStyle EscapementStyle
+    {
+        get => DllImports.CommandSpawn_GetEscapementStyle(Handle);
+        set => DllImports.CommandSpawn_SetEscapementStyle(Handle, value);
     }
 
     public string Name = "";
@@ -97,6 +142,14 @@ public class CommandSpawn
     {
         Name = shell.name;
         DllImports.CommandSpawn_SetShell(Handle, ref shell);
+    }
+
+    public void SetShellExplicit(string name, string shell, string shell_switch)
+    {
+        utf8_string_struct n = name;
+        utf8_string_struct s = shell;
+        utf8_string_struct ss = shell_switch;
+        DllImports.CommandSpawn_SetShellExplicit(Handle, ref n, ref s, ref ss);
     }
 
     public void Command(string command, E_PIPE pipes)
@@ -172,16 +225,38 @@ public class CommandSpawn
         DllImports.CommandSpawn_Join(Handle);
         return s;
     }
+
+    public string ToString(string command)
+    {
+        utf8_string_struct cmd = command;
+        return DllImports.CommandSpawn_ToString(Handle, ref cmd);
+    }
     
     public void Join()
     {
         DllImports.CommandSpawn_Join(Handle);
     }
 
+    public void ClosePipe(E_PIPE pipes)
+    {
+        DllImports.CommandSpawn_ClosePipe(Handle, pipes);
+    }
+
     public void WriteString(string input)
     {
         utf8_string_struct i = input;
         DllImports.CommandSpawn_WriteString(Handle, ref i);
+    }
+
+    public void WriteLine(string line)
+    {
+        utf8_string_struct l = line;
+        DllImports.CommandSpawn_WriteLine(Handle, ref l);
+    }
+
+    public void WriteByte(char _byte)
+    {
+        DllImports.CommandSpawn_WriteByte(Handle, _byte);
     }
     public string ReadToEnd(E_PIPE pipe = E_PIPE.E_PIPE_STDOUT)
     {
@@ -190,6 +265,16 @@ public class CommandSpawn
     public string ReadLine(E_PIPE pipe = E_PIPE.E_PIPE_STDOUT)
     {
         return DllImports.CommandSpawn_ReadLine(Handle, pipe);
+    }
+
+    public bool HasData(E_PIPE pipe = E_PIPE.E_PIPE_STDOUT)
+    {
+        return DllImports.CommandSpawn_HasData(Handle, pipe);
+    }
+
+    public int ReadByte(E_PIPE pipe = E_PIPE.E_PIPE_STDOUT)
+    {
+        return DllImports.CommandSpawn_ReadByte(Handle, pipe);
     }
     
     public CommandPipe CreateCommandPipe()
@@ -255,6 +340,9 @@ public class CommandPipe
 
     public void SendCommand(string command)
     {
+        if (_wrapCommand == null)
+            throw new InvalidOperationException("CommandPipe requires a shell-specific wrapper/parser.");
+        
         string wrappedCommand = _wrapCommand(command);
         _commandSpawn.WriteString(wrappedCommand + "\n");
         _sentinelEncountered = false;
@@ -263,6 +351,9 @@ public class CommandPipe
     public string? ReadOutputLine()
     {
         if (_sentinelEncountered) return null;
+        
+        if (_parseOutputLine == null)
+            throw new InvalidOperationException("CommandPipe requires a shell-specific wrapper/parser.");
 
         string? line = _commandSpawn.ReadLine();
         if (line == null) throw new Exception("Unexpected EOF before sentinel.");

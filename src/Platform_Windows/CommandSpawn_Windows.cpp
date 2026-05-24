@@ -60,7 +60,7 @@ public:
         return exitCode;
     }
 
-    Shell GetShell_Defaultl() override {
+    Shell GetShell_Default() override {
         return { "cmd", "cmd", "/c" };
     }
 

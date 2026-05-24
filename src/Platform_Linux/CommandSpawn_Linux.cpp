@@ -66,7 +66,7 @@ namespace JWCCommandSpawn {
             CommandSpawn_Linux::Join();
         }
 
-        Shell GetShell_Defaultl() override {
+        Shell GetShell_Default() override {
             return { "sh", "/bin/sh", "-c" };
         }
 

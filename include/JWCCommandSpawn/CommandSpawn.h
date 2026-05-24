@@ -27,6 +27,16 @@ namespace JWCCommandSpawn {
             E_PIPE_STDIN=4
         };
 
+        enum EscapementStyle {
+            EscapementStyle_Auto = 0,
+            EscapementStyle_None = 1,
+            EscapementStyle_Raw = 1,
+            EscapementStyle_PosixShell = 2,
+            EscapementStyle_WindowsCommandLine = 3,
+            EscapementStyle_CmdExe = 4,
+            EscapementStyle_PowerShell = 5
+        };
+
         bool END[5] = {};
 
         struct Shell {
@@ -47,6 +57,7 @@ namespace JWCCommandSpawn {
         long last_return = 0;
 
         Shell shell = {nullptr, nullptr, nullptr};
+        EscapementStyle escapement_style = EscapementStyle_Auto;
 
         void ClearShell() {
             shell = {nullptr, nullptr, nullptr};
@@ -56,11 +67,14 @@ namespace JWCCommandSpawn {
 
         virtual ~CommandSpawn();
 
-        virtual Shell GetShell_Defaultl() = 0;
+        virtual Shell GetShell_Default() = 0;
         virtual Shell GetShell_Bash() = 0;
         virtual Shell GetShell_Python();
 
         virtual bool HasShell(Shell shell) = 0;
+
+        virtual void SetEscapementStyle(EscapementStyle style);
+        virtual EscapementStyle GetEscapementStyle();
 
         virtual void SetShell(Shell shell);
         virtual void SetShellExplicit(utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
@@ -90,12 +104,16 @@ namespace JWCCommandSpawn {
 
     _EXPORT_ P_INSTANCE(CommandSpawn) CommandSpawn_Create();
     _EXPORT_ void CommandSpawn_Destroy(P_INSTANCE(CommandSpawn) This);
+    _EXPORT_ utf8_string_struct CommandSpawn_escapeStringForCommandLine(utf8_string_struct value, CommandSpawn::EscapementStyle style);
 
-    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Defaultl(P_INSTANCE(CommandSpawn) This);
+    _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Default(P_INSTANCE(CommandSpawn) This);
     _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Bash(P_INSTANCE(CommandSpawn) This);
     _EXPORT_ CommandSpawn::Shell CommandSpawn_GetShell_Python(P_INSTANCE(CommandSpawn) This);
 
     _EXPORT_ bool CommandSpawn_HasShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
+
+    _EXPORT_ void CommandSpawn_SetEscapementStyle(P_INSTANCE(CommandSpawn) This, CommandSpawn::EscapementStyle style);
+    _EXPORT_ CommandSpawn::EscapementStyle CommandSpawn_GetEscapementStyle(P_INSTANCE(CommandSpawn) This);
 
     _EXPORT_ void CommandSpawn_SetShell(P_INSTANCE(CommandSpawn) This, CommandSpawn::Shell shell);
     _EXPORT_ void CommandSpawn_SetShellExplicit(P_INSTANCE(CommandSpawn) This, utf8_string_struct name, utf8_string_struct shell, utf8_string_struct shell_switch);
