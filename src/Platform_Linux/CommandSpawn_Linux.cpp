@@ -268,7 +268,7 @@ namespace JWCCommandSpawn {
         }
 
         int ReadByte(E_PIPE targ) override {
-            char ch;
+            unsigned char ch;
 
             int pipe;
 
