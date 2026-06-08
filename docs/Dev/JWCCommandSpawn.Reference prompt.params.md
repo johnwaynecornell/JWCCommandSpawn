@@ -1,0 +1,11 @@
+## Parameters
+- Repository name: JWCCommandSpawn
+- Primary purpose: Cross-platform process spawning library with stdin/stdout/stderr pipe management, shell abstraction, and command-line escapement. Provides a native C++17 API and a .NET P/Invoke wrapper.
+- Main languages/runtimes: C++17, C#/.NET 10.0
+- Target platforms: Windows and Linux
+- Primary solution/project files: CMakeLists.txt, Project/JWCCommandSpawn.net/JWCCommandSpawn.net.sln
+- Special focus areas: _EXPORT_ native entry points, pipe management (E_PIPE flags), shell abstraction (Shell enum), escapement styles (EscapementStyle enum), managed .NET wrapper
+- Reference depth: deep
+- File path style: repo-relative only
+- Export marker: _EXPORT_
+- Existing Reference.md policy: create
