@@ -29,30 +29,44 @@ stderrSniffer.Glyph = glyph =>
 
 bool ExitNow = false;
 
-spawn.Command(Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ansi_interactive_demo.sh"), 
+string path = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ansi_interactive_demo.sh");
+
+spawn.Command($"$(cygpath \"{path}\")", 
+//spawn.Command(path, 
     CommandSpawn.E_PIPE.E_PIPE_STDOUT | CommandSpawn.E_PIPE.E_PIPE_STDERR);
 
 new Thread(PollingCommandSpawnPipesThroughAnsiEffectSniffer).Start();
 
 spawn.Join();
+
 ExitNow = true;
 
 void PollingCommandSpawnPipesThroughAnsiEffectSniffer()
 {
-    while (!ExitNow || spawn.HasData()|| spawn.HasData(CommandSpawn.E_PIPE.E_PIPE_STDERR))
+    bool had;
+    do
     {
+        had = false;
         while (spawn.HasData())
         {
             var ch = spawn.ReadByte();
-            if (ch is >= 0 and <= 0xFF) stdoutSniffer.ProcessByte((byte)ch);
+            if (ch is >= 0 and <= 0xFF) 
+            { 
+                had = true; 
+                stdoutSniffer.ProcessByte((byte)ch); 
+            }
         }
 
         while (spawn.HasData(CommandSpawn.E_PIPE.E_PIPE_STDERR))
         {
             var ch = spawn.ReadByte(CommandSpawn.E_PIPE.E_PIPE_STDERR);
-            if (ch is >= 0 and <= 0xFF) stderrSniffer.ProcessByte((byte)ch);
+            if (ch is >= 0 and <= 0xFF) 
+            { 
+                had = true; 
+                stdoutSniffer.ProcessByte((byte)ch); 
+            }
         }
 
         Thread.Sleep(1);
-    }
+    } while (had || !ExitNow);
 }

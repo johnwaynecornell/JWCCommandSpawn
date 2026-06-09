@@ -11,8 +11,8 @@ public class Program
         command.SetShell(command.GetShell_Bash());
 
         command.EscapementStyle = CommandSpawn.E_EscapementStyle.None;
-        string input = "feffect -e \"fg_blue.bg_bright_white(\\\"Hello from the inside\\\")\"";
-        string cmd_text = CommandSpawn.escapeStringForCommandLine(input, CommandSpawn.E_EscapementStyle.PosixShell);
+        string input = "feffect -e 'fg_blue.bg_bright_white(\"Hello from the inside\")'";
+        string cmd_text = CommandSpawn.escapeStringForCommandLine(input, CommandSpawn.E_EscapementStyle.Auto);
 
         Console.WriteLine(command.ToString(cmd_text));
         command.Command(cmd_text, CommandSpawn.E_PIPE.E_PIPE_STDOUT | CommandSpawn.E_PIPE.E_PIPE_STDERR);

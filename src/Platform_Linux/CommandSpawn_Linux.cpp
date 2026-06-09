@@ -139,6 +139,8 @@ namespace JWCCommandSpawn {
 
                 last_return = exit_status;
 
+                while (HasData(E_PIPE_STDOUT) || HasData(E_PIPE_STDERR)) sleep(0);
+
                 Close();
             }
 
@@ -244,11 +246,14 @@ namespace JWCCommandSpawn {
         bool HasData(E_PIPE targ) override {
             char ch;
 
-            int pipe;
+            int pipe = -1;
 
             if (targ == E_PIPE_STDOUT) pipe = state.out_pipe[0];
             else if (targ == E_PIPE_STDERR) pipe = state.err_pipe[0];
             else  throw std::runtime_error("Invalid output stream selector");
+
+            if (pipe < 0)
+                return false;
 
             //file descriptor struct to check if POLLIN bit will be set
             //fd is the file descriptor of the pipe
@@ -261,7 +266,8 @@ namespace JWCCommandSpawn {
             //POLLNVAL is set if the pipe is closed
             if(res < 0 || fds.revents & (POLLERR | POLLNVAL))
             {
-                throw std::runtime_error("Error occured on child process " + (std::string) ((targ == E_PIPE_STDOUT) ? "STDOUT" : "STDERR"));
+                if (fds.events & POLLNVAL) return false;
+                throw std::runtime_error("Error occurred on child processes " + (std::string) ((targ == E_PIPE_STDOUT) ? "STDOUT" : "STDERR"));
 
             }
             return fds.revents & POLLIN;

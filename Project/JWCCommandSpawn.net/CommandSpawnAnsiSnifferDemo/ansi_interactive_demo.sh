@@ -10,7 +10,7 @@ echo
 printf "Enter your name: "
 read name
 
-echo -e "\033[33m😃Hello, $name!\033[0m"
+echo -e "😃 \033[33mHello, $name!\033[0m"
 echo "Now demonstrating delayed output:"
 
 for i in 1 2 3 4 5; do

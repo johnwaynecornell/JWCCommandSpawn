@@ -50,14 +50,20 @@ public:
 
     long Join() override
     {
-        WaitForSingleObject(pi.hProcess, INFINITE);
+        if (pi.hProcess != NULL)
+        {
+            WaitForSingleObject(pi.hProcess, INFINITE);
 
-        DWORD exitCode;
-        // Get the exit code.
-        GetExitCodeProcess(pi.hProcess, &exitCode);
+            DWORD exitCode;
+            // Get the exit code.
+            GetExitCodeProcess(pi.hProcess, &exitCode);
+            last_return = exitCode;
+            
+            while (HasData(E_PIPE_STDOUT) || HasData(E_PIPE_STDERR)) Sleep(0);
 
-        Close();
-        return exitCode;
+            Close();
+        }
+        return last_return;
     }
 
     Shell GetShell_Default() override {
@@ -268,6 +274,8 @@ public:
         else if (targ == E_PIPE_STDERR) pipe = g_hChildStd_ERR_Rd;
         else throw std::runtime_error("Invalid output stream selector");
 
+        if (pipe == NULL) return false;
+
         DWORD bytesAvailable;
 
         if (PeekNamedPipe(pipe, NULL, 0, NULL, &bytesAvailable, NULL)) {
@@ -307,4 +315,5 @@ public:
 
 CommandSpawn *CommandSpawn_Create() {
     return new CommandSpawn_Windows();
-}}
+}
+}
