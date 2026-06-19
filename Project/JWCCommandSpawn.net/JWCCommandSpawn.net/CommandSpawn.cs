@@ -211,18 +211,21 @@ public class CommandSpawn
         return s.ToString();
     }
     */
-    
+
+    public long ExecStatus { get; private set; }
+
     public string Exec(string command, string input)
     {
         utf8_string_struct cmd = command;
         utf8_string_struct forstdin = input;
 
+        ExecStatus = -1;
         DllImports.CommandSpawn_Command(Handle, ref cmd, ref forstdin, E_PIPE.E_PIPE_STDOUT);
 
         //DllImports.CommandSpawn_ClosePipe(Handle, E_PIPE.E_PIPE_STDIN);
         
         string s = ReadToEnd();
-        DllImports.CommandSpawn_Join(Handle);
+        ExecStatus = DllImports.CommandSpawn_Join(Handle);
         return s;
     }
 
@@ -232,9 +235,9 @@ public class CommandSpawn
         return DllImports.CommandSpawn_ToString(Handle, ref cmd);
     }
     
-    public void Join()
+    public long Join()
     {
-        DllImports.CommandSpawn_Join(Handle);
+        return DllImports.CommandSpawn_Join(Handle);
     }
 
     public void ClosePipe(E_PIPE pipes)

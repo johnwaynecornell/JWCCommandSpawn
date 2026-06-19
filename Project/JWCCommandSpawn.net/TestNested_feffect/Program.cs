@@ -27,5 +27,7 @@ public class Program
         s = command.ReadToEnd(CommandSpawn.E_PIPE.E_PIPE_STDOUT);
         
         Console.WriteLine(s);
+        
+        command.Join();
     }
 }
